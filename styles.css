@@ -1,5 +1,5 @@
 body{
-    background-image: url('');
+    background-image: url('bg-1.jpg');
     background-size: cover;
     height: 100vh;
     margin: 0;
@@ -73,6 +73,32 @@ body{
     width: 310px;
     height: 45px;
     color: black;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.alphabetic-key{
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+.alphabetic-key{
+    width: 45px;
+    height: 45px;
+    position: relative;
+}
+
+.alphabetic-key span{
+    position: absolute;
+    font-size: 20px;
+}
+
+.alphabetic-key img{
+    position: absolute;
+    height: 100%;
+    width: 100%;
+    border-radius: 8px;
 }
 
 #timer{
