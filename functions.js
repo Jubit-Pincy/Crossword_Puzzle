@@ -26,10 +26,26 @@ function blocks(){
     return document.querySelectorAll('.block')
 }
 
+function placeResult(result,direction,X,Y)
+    let html=' '
+    let occupied = []
+    let cellNo = coordsToCellNo(X,Y)
+
+    for(let i=0;i<result.length;i++){
+        occupied.push(direction=='horizontal'? cellNo+i : cellNo+(i*10))
+        let style ='margin-left:${direction=='horizontal'?X+(i*50):X}px; margin-top:${direction=='vertical'?Y+(i*50):Y}px;'
+        html += '<div class='block'style='${style}'>${result[i].toUpperCase()}</div>'
+     }
+     
+     ContainerRule.insertAdjacentHTML('beforeend',html)
+
+    return occupied
+}
+
 function getResults(){
     let  results
     let alphabets = ['a','b','c','d','e','f','g','h','i','j','k','l','m','n','o','p','q','r','s','t','u','v','w','x','y','z']
-
+do{
     sample =''
     results = []
     let toBeSelectedForm = [...alphabets]
@@ -62,4 +78,9 @@ function getResults(){
     }
     })
 }
+while(results.length<=15) || results.filter(result=>result.length>=5).length>3)
 
+    results.sort((a,b)=>b.length-a.length)
+    results= results.slice(0,15)
+    return results
+}
