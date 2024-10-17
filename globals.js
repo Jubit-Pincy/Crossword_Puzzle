@@ -1,11 +1,11 @@
 let sample
 let data = []
-let gameStarted = false
-let keysAllowed = false
-let countdownID
-let solved = []
-let bgNum = 2
-let skips = 0
+// let gameStarted = false
+// let keysAllowed = false
+// let countdownID
+// let solved = []
+// let bgNum = 2
+// let skips = 0
 
 let body = document.querySelector('body')
 let container = document.querySelector('#container')
