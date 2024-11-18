@@ -94,12 +94,17 @@ function placeFirstResult(results){
 }
 
 function placeResults(){
+    data = []
+    blocks().forEach(block => block.remove())
     let results = getResults()
-    console.log(results)
     placeFirstResult(results)
     let remaining = results.slice(1)
 
-    for(let iterations = 0; iterations<9; iterations++){
+    for(let iterations = 0; iterations<15; iterations++){
+        if(data.length==10){
+            break;
+        }
+
         let placements = []
         Array.from(remaining[0]).forEach((alphabet_A,index_A)=>{
             data.forEach((object)=>{
@@ -155,7 +160,13 @@ function placeResults(){
                 }
             }
         }
+        if(!validPlacement){
+            results.push(results.splice(results.indexOf(remaining[0]), 1)[0])
+            remaining.push(remaining.shift())
+        }
     }
+
+    arrangeBlocks()
 }
 
 function getGridWords(){
@@ -201,4 +212,37 @@ function getBlocksAtCellNo(cellNo){
         }
     })
     return blocksFound
+}
+function arrangeBlocks(){
+    let min_X = +Infinity
+    let max_X = -Infinity
+    let min_Y = +Infinity
+    let max_Y = -Infinity
+
+    blocks().forEach((blocks)=>{
+        min_X = Math.min(min_X, marginLeft(block))
+        max_X = Math.min(max_X, marginLeft(block))
+        min_Y = Math.min(min_Y, marginTop(block))
+        max_Y = Math.min(max_Y, marginTop(block))
+    })
+
+    let emptyColumnsOnLS = min_X/50
+    let emptyColumnsOnRS = (450-max_X)/50
+
+    data.forEach((object)=>{
+        object.occupied = object.occupied.map(cellNo => cellNo+Math.trunc((emptyColumnsOnRS-emptyColumnsOnLS)/2))
+    })
+    blocks().forEach((blocks)=>{
+        block.style.marginLeft = `${marginLeft(block)+(Math.trunc((emptyColumnsOnRS-emptyColumnsOnLS)/2)*50)}px`
+    })
+
+    let emptyRowsOnUS = min_Y/50
+    let emptyRowsOnBS = (450-max_Y)/50
+
+    data.forEach((object)=>{
+        object.occupied = object.occupied.map(cellNo => cellNo+(Math.trunc((emptyRowsOnBS-emptyRowsOnUS)/2)*10))
+    })
+    blocks().forEach((block)=>{
+        block.style.marginTop = `${marginTop(block)+(Math.trunc((emptyRowsOnBS-emptyRowsOnUS)/2)*50)}px`
+    })
 }
