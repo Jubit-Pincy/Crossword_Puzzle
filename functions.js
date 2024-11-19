@@ -96,6 +96,8 @@ function placeFirstResult(results){
 function placeResults(){
     data = []
     blocks().forEach(block => block.remove())
+    cells.forEach(cell => cell.style.opacity = '1')
+
     let results = getResults()
     placeFirstResult(results)
     let remaining = results.slice(1)
@@ -167,6 +169,11 @@ function placeResults(){
     }
 
     arrangeBlocks()
+    cells.forEach((cell,cellNo)=>{
+            if(!data.find(object => object.occupied.includes(cellNo))){
+                cell.style.opacity = '0'
+            }
+    })
 }
 
 function getGridWords(){
@@ -219,7 +226,7 @@ function arrangeBlocks(){
     let min_Y = +Infinity
     let max_Y = -Infinity
 
-    blocks().forEach((blocks)=>{
+    blocks().forEach((block)=>{
         min_X = Math.min(min_X, marginLeft(block))
         max_X = Math.min(max_X, marginLeft(block))
         min_Y = Math.min(min_Y, marginTop(block))
@@ -232,7 +239,7 @@ function arrangeBlocks(){
     data.forEach((object)=>{
         object.occupied = object.occupied.map(cellNo => cellNo+Math.trunc((emptyColumnsOnRS-emptyColumnsOnLS)/2))
     })
-    blocks().forEach((blocks)=>{
+    blocks().forEach((block)=>{
         block.style.marginLeft = `${marginLeft(block)+(Math.trunc((emptyColumnsOnRS-emptyColumnsOnLS)/2)*50)}px`
     })
 
