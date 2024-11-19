@@ -26,6 +26,22 @@ function blocks(){
     return document.querySelectorAll('.block')
 }
 
+function triggerCountdown(){
+    clearInterval(countdownID)
+    countdown.innerHTML = '300'
+    countdownID = setInterval(()=>{
+        countdown.innerHTML = Number(countdown.innerHTML) - 1
+        countdown.innerHTML == '0' && gameOver()
+    },1000)
+}
+
+function gameOver(){
+    bgMusic.pause()
+    new Audio('game over.wav').play()
+    inputString.innerHTML = ''
+    clearInterval(countdownID)
+}
+
 function placeResult(result,direction,X,Y){
     let html=' '
     let occupied = []
