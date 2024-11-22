@@ -39,7 +39,9 @@ function gameOver(){
     bgMusic.pause()
     new Audio('game over.wav').play()
     inputString.innerHTML = ''
+    blocks().forEach(block => block.style.transform = 'scale(1)')
     clearInterval(countdownID)
+    keysAllowed = false
 }
 
 function placeResult(result,direction,X,Y){
@@ -49,10 +51,9 @@ function placeResult(result,direction,X,Y){
 
     for(let i=0;i<result.length;i++){
         occupied.push(direction=='horizontal'? cellNo+i : cellNo+(i*10))
-        let style =`margin-left:${direction=='horizontal'?X+(i*50):X}px; margin-top:${direction=='vertical'?Y+(i*50):Y}px;`
+        let style =`margin-left:${direction=='horizontal'?X+(i*50):X}px; margin-top:${direction=='vertical'?Y+(i*50):Y}px; transform:scale(0);`
         html += `<div class='block'style='${style}'>${result[i].toUpperCase()}</div>`
      }
-     
      container.insertAdjacentHTML('beforeend',html)
 
     return occupied
@@ -61,7 +62,8 @@ function placeResult(result,direction,X,Y){
 function getResults(){
     let  results
     let alphabets = ['a','b','c','d','e','f','g','h','i','j','k','l','m','n','o','p','q','r','s','t','u','v','w','x','y','z']
-do{
+
+    do{
     sample =''
     results = []
     let toBeSelectedFrom = [...alphabets]
