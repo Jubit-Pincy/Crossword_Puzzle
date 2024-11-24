@@ -37,43 +37,36 @@ document.addEventListener('keydown', async(e)=>{
         spaceKeyImg.style.filter = 'brightness(50%)'
         let correct = false
 
-        data.forEach((object)=>{
-            if(object.result==inputString.innerHTML.toLowerCase() && !solved.includes(inputString.innerHTML.toLowerCase())){
-                correct = true
-                new Audio('correct.mp3').play()
-                scoreValue.innerHTML = Number(scoreValue.innerHTML) + (object.result.length*10)
-                scoreText.style.color = 'lime'
+        data.forEach((object) => {
+            if (object.result == inputString.innerHTML.toLowerCase() && !solved.includes(inputString.innerHTML.toLowerCase())) {
+                correct = true;
+                new Audio('correct.mp3').play();
+                scoreValue.innerHTML = Number(scoreValue.innerHTML) + (object.result.length * 10);
+                scoreText.style.color = 'lime';
                 scoreText.animate(
-                    [{color:'lime'}, {color:'white'}],
-                    {duration: 3000, easing: 'linear', fill: 'forwards'}
-                )
-
-                object.occupied.forEach((cellNo)=>{
-                    let blocksArray = getBlocksAtCellNo(cellNo)
-                    if(blocksArray.length==1){
-                        blocksArray[0].style.transform = 'scale(1)'
-                    }
-                    else if(blocksArray.length==2){
-                        if(blocksArray[0].style.transform=='scale(0)'){
-                            blocksArray[0].style.transform = 'scale(1)'
-                        }
-                        else{
-                            blocksArray[1].style.transform = 'scale(1)'
-                        }
-                    }
-                })
-                solved.push(object.result)
-
-                if(solved.length==10){
-                    bgMusic.pause()
-                    new Audio('win.mp3').play()
-                    clearInterval(countdownID)
-                    scoreValue.innerHTML = Number(scoreValue.innerHTML) + Number(countdown.innerHTML) + 1000
-                }
+                    [{ color: 'lime' }, { color: 'white' }],
+                    { duration: 3000, easing: 'linear', fill: 'forwards' }
+                );
+        
+                console.log('Occupied cells:', object.occupied); // Check occupied cells
+                object.occupied.forEach((cellNo) => {
+                    const blocks = getBlocksAtCellNo(cellNo);
+                    console.log('Blocks at cell:', blocks); // Check which blocks are found
+                    blocks.forEach((block) => {
+                        block.style.transform = 'scale(1)';
+                        console.log('Updated block style:', block.style.transform); // Confirm the update
+                    });
+                });
+        
+                solved.push(object.result);
+                console.log('Correct Answers:', solved);
+                console.log('Result:', object.result, 'Occupied cells:', object.occupied);
             }
         })
         !correct && new Audio('wrong.mp3').play()
         inputString.innerHTML = ''
+        document.querySelectorAll('.block').forEach(block => console.log(block.style.transform));
+
     }
     else if(e.key=='Enter' && keysAllowed && (solved.length==10 || skips!=3)){
         solved.length!=10 && skips++
@@ -109,7 +102,7 @@ document.addEventListener('keydown', async(e)=>{
 document.addEventListener('keyup', (e)=>{
     if(keysAllowed && sample.includes(e.key.toLowerCase())){
         setTimeout(()=>{
-            alphaKeys[sample.indexOf(e.key.toLowerCase())].querySelector('img').style.filter = 'brightness(50%)'
+            alphaKeys[sample.indexOf(e.key.toLowerCase())].querySelector('img').style.filter = 'brightness(100%)'
         },100)
     }
     else if(keysAllowed && e.code=='Space'){
@@ -119,7 +112,7 @@ document.addEventListener('keyup', (e)=>{
     }
     else if(keysAllowed && e.key=='Backspace'){
         setTimeout(()=>{
-            backspaceKeyImg.style.filter = 'brightness(50%)'
+            backspaceKeyImg.style.filter = 'brightness(100%)'
         },100)
     }
 })

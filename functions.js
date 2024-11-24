@@ -1,5 +1,11 @@
-function coordsToCellNo(X,Y){
-    return ((Y/50)*10) + (X/50)
+function coordsToCellNo(X, Y) {
+    if (!isFinite(X) || !isFinite(Y) || X < 0 || Y < 0 || X > 450 || Y > 450) {
+        console.error('Invalid X or Y coordinates:', X, Y);
+        return -1; // Return an invalid cell number
+    }
+    let column = Math.floor(X / 50);
+    let row = Math.floor(Y / 50);
+    return row * 10 + column;
 }
 
 function cellNoToX(cellNo){
@@ -10,13 +16,24 @@ function cellNoToY(cellNo){
     return Math.trunc(cellNo/10)*50
 }
 
-function marginLeft(block){
-    return Number(block.style.marginLeft.split('px')[0])
+function marginLeft(block) {
+    let left = Number(block.style.marginLeft.split('px')[0]);
+    if (left < 0 || left > 450) {
+        console.error('Invalid marginLeft:', left);
+        return -1;
+    }
+    return left;
 }
 
-function marginTop(block){
-    return Number(block.style.marginTop.split('px')[0])
+function marginTop(block) {
+    let top = Number(block.style.marginTop.split('px')[0]);
+    if (top < 0 || top > 450) {
+        console.error('Invalid marginTop:', top);
+        return -1;
+    }
+    return top;
 }
+
 
 function invertDirection(direction){
     return direction == 'horizontal' ? 'vertical' : 'horizontal'
@@ -26,38 +43,63 @@ function blocks(){
     return document.querySelectorAll('.block')
 }
 
-function triggerCountdown(){
-    clearInterval(countdownID)
-    countdown.innerHTML = '300'
-    countdownID = setInterval(()=>{
-        countdown.innerHTML = Number(countdown.innerHTML) - 1
-        countdown.innerHTML == '0' && gameOver()
-    },1000)
+function triggerCountdown() {
+    clearInterval(countdownID);
+    countdown.innerHTML = '300'; // Reset countdown to 5 minutes
+
+    countdownID = setInterval(() => {
+        countdown.innerHTML = Number(countdown.innerHTML) - 1;
+        
+        if (countdown.innerHTML == '0') {
+            gameOver(); // Call gameOver when time runs out
+        }
+    }, 1000);
 }
+
 
 function gameOver(){
-    bgMusic.pause()
-    new Audio('game over.wav').play()
-    inputString.innerHTML = ''
-    blocks().forEach(block => block.style.transform = 'scale(1)')
-    clearInterval(countdownID)
-    keysAllowed = false
+    bgMusic.pause();
+    new Audio('game over.wav').play();
+    clearInterval(countdownID);
+    inputString.innerHTML = '';
+    updateScoreBasedOnTime();
+    blocks().forEach(block => block.style.transform = 'scale(1)');
+    keysAllowed = false;
 }
 
-function placeResult(result,direction,X,Y){
-    let html=' '
-    let occupied = []
-    let cellNo = coordsToCellNo(X,Y)
-
-    for(let i=0;i<result.length;i++){
-        occupied.push(direction=='horizontal'? cellNo+i : cellNo+(i*10))
-        let style =`margin-left:${direction=='horizontal'?X+(i*50):X}px; margin-top:${direction=='vertical'?Y+(i*50):Y}px; transform:scale(0);`
-        html += `<div class='block'style='${style}'>${result[i].toUpperCase()}</div>`
-     }
-     container.insertAdjacentHTML('beforeend',html)
-
-    return occupied
+function updateScoreBasedOnTime() {
+    let remainingTime = parseInt(countdown.innerHTML); // Get the remaining time from the countdown element
+    let pointsToAdd = Math.floor(remainingTime / 10) * 10; // Round down to the nearest multiple of 10
+    
+    // Add points to score
+    scoreValue.innerHTML = Number(scoreValue.innerHTML) + pointsToAdd;
+    console.log(`Remaining time: ${remainingTime}s, Points added: ${pointsToAdd}`);
 }
+
+
+function placeResult(result, direction, X, Y) {
+    let html = ' ';
+    let occupied = [];
+    let cellNo = coordsToCellNo(X, Y);
+    console.log('Initial cell number:', cellNo); // Add this log
+
+    if (cellNo === -1) { // Check if invalid cellNo
+        console.error('Invalid cellNo:', cellNo);
+        return [];
+    }
+
+    for (let i = 0; i < result.length; i++) {
+        occupied.push(direction == 'horizontal' ? cellNo + i : cellNo + (i * 10));
+        console.log('Occupied cell:', occupied[i]); // Log each occupied cell number
+
+        let style = `margin-left:${direction == 'horizontal' ? X + (i * 50) : X}px; margin-top:${direction == 'vertical' ? Y + (i * 50) : Y}px; transform:scale(0);`;
+        html += `<div class='block' style='${style}'>${result[i].toUpperCase()}</div>`;
+    }
+
+    container.insertAdjacentHTML('beforeend', html);
+    return occupied;
+}
+
 
 function getResults(){
     let  results
@@ -229,45 +271,68 @@ function getGridWords(){
     return gridWords
 }
 
-function getBlocksAtCellNo(cellNo){
-    let blocksFound = []
-    blocks().forEach((block)=>{
-        if(marginLeft(block)==cellNoToX(cellNo) && marginTop(block)==cellNoToY(cellNo)){
-            blocksFound.push(block)
+function getBlocksAtCellNo(cellNo) {
+    if (!isFinite(cellNo)) {
+        console.error('Invalid cell number:', cellNo);
+        return [];
+    }
+    let blocksFound = [];
+    blocks().forEach((block) => {
+        let blockX = marginLeft(block);
+        let blockY = marginTop(block);
+        
+        // Ensure the X and Y are within grid bounds
+        blockX = Math.max(0, Math.min(blockX, 450));  // Clamp to 450px max
+        blockY = Math.max(0, Math.min(blockY, 450));  // Clamp to 450px max
+
+        if (blockX === cellNoToX(cellNo) && blockY === cellNoToY(cellNo)) {
+            blocksFound.push(block);
         }
-    })
-    return blocksFound
+    });
+    return blocksFound;
 }
-function arrangeBlocks(){
-    let min_X = +Infinity
-    let max_X = -Infinity
-    let min_Y = +Infinity
-    let max_Y = -Infinity
 
-    blocks().forEach((block)=>{
-        min_X = Math.min(min_X, marginLeft(block))
-        max_X = Math.min(max_X, marginLeft(block))
-        min_Y = Math.min(min_Y, marginTop(block))
-        max_Y = Math.min(max_Y, marginTop(block))
-    })
 
-    let emptyColumnsOnLS = min_X/50
-    let emptyColumnsOnRS = (450-max_X)/50
+function arrangeBlocks() {
+    let min_X = +Infinity;
+    let max_X = -Infinity;
+    let min_Y = +Infinity;
+    let max_Y = -Infinity;
 
-    data.forEach((object)=>{
-        object.occupied = object.occupied.map(cellNo => cellNo+Math.trunc((emptyColumnsOnRS-emptyColumnsOnLS)/2))
-    })
-    blocks().forEach((block)=>{
-        block.style.marginLeft = `${marginLeft(block)+(Math.trunc((emptyColumnsOnRS-emptyColumnsOnLS)/2)*50)}px`
-    })
+    blocks().forEach((block) => {
+        min_X = Math.min(min_X, marginLeft(block));
+        max_X = Math.max(max_X, marginLeft(block)); // Fixed the comparison logic
+        min_Y = Math.min(min_Y, marginTop(block));
+        max_Y = Math.max(max_Y, marginTop(block)); // Fixed the comparison logic
+    });
 
-    let emptyRowsOnUS = min_Y/50
-    let emptyRowsOnBS = (450-max_Y)/50
+    let emptyColumnsOnLS = min_X / 50;
+    let emptyColumnsOnRS = (450 - max_X) / 50;
 
-    data.forEach((object)=>{
-        object.occupied = object.occupied.map(cellNo => cellNo+(Math.trunc((emptyRowsOnBS-emptyRowsOnUS)/2)*10))
-    })
-    blocks().forEach((block)=>{
-        block.style.marginTop = `${marginTop(block)+(Math.trunc((emptyRowsOnBS-emptyRowsOnUS)/2)*50)}px`
-    })
+    data.forEach((object) => {
+        object.occupied = object.occupied.map(
+            (cellNo) => cellNo + Math.trunc((emptyColumnsOnRS - emptyColumnsOnLS) / 2)
+        );
+    });
+
+    blocks().forEach((block) => {
+        let newMarginLeft = marginLeft(block) + Math.trunc((emptyColumnsOnRS - emptyColumnsOnLS) / 2) * 50;
+        newMarginLeft = Math.max(0, Math.min(newMarginLeft, 450)); // Ensure marginLeft stays within bounds
+        block.style.marginLeft = `${newMarginLeft}px`;
+    });
+
+    let emptyRowsOnUS = min_Y / 50;
+    let emptyRowsOnBS = (450 - max_Y) / 50;
+
+    data.forEach((object) => {
+        object.occupied = object.occupied.map(
+            (cellNo) => cellNo + Math.trunc((emptyRowsOnBS - emptyRowsOnUS) / 2) * 10
+        );
+    });
+
+    blocks().forEach((block) => {
+        let newMarginTop = marginTop(block) + Math.trunc((emptyRowsOnBS - emptyRowsOnUS) / 2) * 50;
+        newMarginTop = Math.max(0, Math.min(newMarginTop, 450)); // Ensure marginTop stays within bounds
+        block.style.marginTop = `${newMarginTop}px`;
+    });
 }
