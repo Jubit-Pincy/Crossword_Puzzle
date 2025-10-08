@@ -48,23 +48,79 @@ function triggerCountdown() {
     countdown.innerHTML = '300'; // Reset countdown to 5 minutes
 
     countdownID = setInterval(() => {
-        countdown.innerHTML = Number(countdown.innerHTML) - 1;
+        let currentCount = Number(countdown.innerHTML);
         
-        if (countdown.innerHTML == '0') {
-            gameOver(); // Call gameOver when time runs out
+        // Prevent negative time display and ensure stop at 0
+        if (currentCount <= 0) {
+            clearInterval(countdownID); // Stop the interval immediately
+            countdown.innerHTML = '0';
+            gameOver(false); // Call gameOver for timeout
+        } else {
+            countdown.innerHTML = currentCount - 1;
         }
     }, 1000);
 }
 
-
-function gameOver(){
-    bgMusic.pause();
-    new Audio('game over.wav').play();
-    clearInterval(countdownID);
-    inputString.innerHTML = '';
-    updateScoreBasedOnTime();
-    blocks().forEach(block => block.style.transform = 'scale(1)');
+// NEW: Function to display instructions
+function showInstructions() {
     keysAllowed = false;
+    modalOverlay.classList.remove('hidden');
+    // Ensure all blocks are hidden initially before game starts
+    blocks().forEach(block => block.style.transform = 'scale(0)'); 
+}
+
+// NEW: Function to hide instructions and start the game
+function hideInstructions() {
+    modalOverlay.classList.add('hidden');
+    // Game start logic moved from click listener
+    gameStarted = true;
+    inputString.innerHTML = '';
+    triggerCountdown();
+    document.querySelectorAll('.alphabetic-key span').forEach(elem => {elem.style.opacity = '1'});
+    keysAllowed = true;
+}
+
+// MODIFIED BLOCK in functions.js (inside function gameOver)
+function gameOver(completed){
+    clearInterval(countdownID);
+    keysAllowed = false;
+    
+    inputString.innerHTML = completed ? 'PUZZLE COMPLETE!' : 'TIME\'S UP!';
+    
+    if (completed) {
+        puzzleCompleteSound.play();
+        // Fire confetti for puzzle completion
+        confetti({
+            particleCount: 150,
+            spread: 90,
+            origin: { y: 0.6 }
+        });
+        updateScoreBasedOnTime(); // Grant remaining time bonus
+        
+        // Change button text
+        closeModalBtn.innerHTML = 'Next Puzzle (Enter)';
+        
+        // Ensure keys are allowed ONLY for the next puzzle advance
+        keysAllowed = true; // Temporary set to true to enable the keydown listener in the main eventListeners.js file
+
+    } else {
+        timesUpSound.play();
+        document.querySelectorAll('.alphabetic-key span').forEach(elem => {elem.style.opacity = '0.5'});
+        closeModalBtn.innerHTML = 'Try Again (Enter)';
+        
+        // Ensure keys are allowed ONLY for the next puzzle advance
+        keysAllowed = true; // Temporary set to true to enable the keydown listener in the main eventListeners.js file
+    }
+    
+    // Show modal with end message
+    instructionModal.querySelector('h2').innerHTML = completed ? 'Congratulations!' : 'Game Over!';
+    instructionModal.querySelector('p').innerHTML = `Your final score is: ${scoreValue.innerHTML}. Press Enter to ${completed ? 'continue' : 'try again'}.`;
+    modalOverlay.classList.remove('hidden');
+
+    blocks().forEach(block => block.style.transform = 'scale(1)');
+    
+    // !!! DELETE OR COMMENT OUT THIS LINE - IT'S NO LONGER NEEDED !!!
+    // document.addEventListener('keydown', handleGameEndKeys, { once: true });
 }
 
 function updateScoreBasedOnTime() {
@@ -102,8 +158,8 @@ function placeResult(result, direction, X, Y) {
 
 
 function getResults(){
-    let  results
-    let alphabets = ['a','b','c','d','e','f','g','h','i','j','k','l','m','n','o','p','q','r','s','t','u','v','w','x','y','z']
+    let results
+    let alphabets = ['a','b','c','d','e','f','g','h','i','j','k','l','m','n','o','p','q','r','s', 't','u','v','w','x','y','z']
 
     do{
     sample =''
@@ -230,9 +286,9 @@ function placeResults(){
 
     arrangeBlocks()
     cells.forEach((cell,cellNo)=>{
-            if(!data.find(object => object.occupied.includes(cellNo))){
-                cell.style.opacity = '0'
-            }
+        if(!data.find(object => object.occupied.includes(cellNo))){
+            cell.style.opacity = '0'
+        }
     })
 }
 
@@ -282,8 +338,8 @@ function getBlocksAtCellNo(cellNo) {
         let blockY = marginTop(block);
         
         // Ensure the X and Y are within grid bounds
-        blockX = Math.max(0, Math.min(blockX, 450));  // Clamp to 450px max
-        blockY = Math.max(0, Math.min(blockY, 450));  // Clamp to 450px max
+        blockX = Math.max(0, Math.min(blockX, 450)); // Clamp to 450px max
+        blockY = Math.max(0, Math.min(blockY, 450)); // Clamp to 450px max
 
         if (blockX === cellNoToX(cellNo) && blockY === cellNoToY(cellNo)) {
             blocksFound.push(block);

@@ -2,8 +2,36 @@
 <html>
     <head>
         <link rel="stylesheet" href="styles.css">
+        <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.0/dist/confetti.browser.js"></script>
     </head>
     <body>
+
+         <div id="modal-overlay" class="hidden">
+            <div id="instruction-modal">
+                <h2>How to Play</h2>
+                <p>Welcome to the Word Grid Challenge! Use the letters displayed below the grid to form words that exist in the puzzle.</p>
+                <div class="instruction-key">
+                    <span class="key-label">Type Letters:</span>
+                    <span class="key-icon">A-Z</span>
+                </div>
+                <div class="instruction-key">
+                    <span class="key-label">Submit Word:</span>
+                    <span class="key-icon">Spacebar</span>
+                </div>
+                <div class="instruction-key">
+                    <span class="key-label">Delete Letter:</span>
+                    <span class="key-icon">Backspace</span>
+                </div>
+                <div class="instruction-key">
+                    <span class="key-label">Skip Puzzle:</span>
+                    <span class="key-icon">Enter</span>
+                    <span class="key-note">(Max 3 skips)</span>
+                </div>
+                <button id="close-modal-btn">Start Game</button>
+            </div>
+        </div>
+        <audio id="puzzle-complete-sound" src="win.mp3" preload="auto"></audio>
+        <audio id="times-up-sound" src="game over.wav" preload="auto"></audio>
         <div id="container">
             <div class="cell"></div>
             <div class="cell"></div>
@@ -156,8 +184,6 @@
                 <span id="scoreText">Score: <span id="scoreValue">0</span></span>
             </div>
         </div>
-
-        <audio src='bgMusic.mp3' id='bgMusic' loop></audio>
     </body>
         <script src="globals.js"></script>
         <script src="functions.js"></script>

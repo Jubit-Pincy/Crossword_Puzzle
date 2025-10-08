@@ -18,6 +18,14 @@ let scoreText = document.querySelector('#scoreText')
 let scoreValue = document.querySelector('#scoreValue')
 let countdown = document.querySelector('#countdown')
 
+// NEW GLOBAL ELEMENTS
+let modalOverlay = document.querySelector('#modal-overlay')
+let instructionModal = document.querySelector('#instruction-modal')
+let closeModalBtn = document.querySelector('#close-modal-btn')
+let puzzleCompleteSound = document.querySelector('#puzzle-complete-sound')
+let timesUpSound = document.querySelector('#times-up-sound')
+// END NEW
+
 let dictionary = [
     "a",
     "abandon",
